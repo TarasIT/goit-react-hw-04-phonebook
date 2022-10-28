@@ -9,13 +9,7 @@ export const ContactForm = ({ submitHandler }) => {
 
   const handleSubmit = e => {
     e.preventDefault();
-
-    const newContact = {};
-    newContact.id = nanoid();
-    newContact.name = name;
-    newContact.number = number;
-
-    submitHandler(newContact);
+    submitHandler({ id: nanoid(), name, number });
     reset();
   };
 

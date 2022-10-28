@@ -2,7 +2,7 @@ import {
   parseDataFromLS,
   saveContactsToLS,
 } from 'components/LocalStorageService/LocalStorageService';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ContactForm } from '../ContactForm/ContactForm';
 import { ContactList } from '../ContactList/ContactList';
 import { Filter } from '../Filter/Filter';
@@ -14,19 +14,12 @@ export const App = () => {
   const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState('');
 
-  const isContactsParsedFromLS = useRef(true);
-  const isContactDeleted = useRef(false);
+  useEffect(() => {
+    setContacts(parseDataFromLS(STORAGE_KEY));
+  }, []);
 
   useEffect(() => {
-    if (isContactsParsedFromLS.current) {
-      setContacts(parseDataFromLS(STORAGE_KEY));
-      isContactsParsedFromLS.current = false;
-      return;
-    }
-    if (isContactDeleted.current) {
-      isContactDeleted.current = false;
-      return;
-    }
+    if (parseDataFromLS(STORAGE_KEY).length > contacts.length) return;
     saveContactsToLS(STORAGE_KEY, contacts);
   }, [contacts]);
 
@@ -35,22 +28,18 @@ export const App = () => {
   );
 
   const addNewContact = newContact => {
-    const sameContact = contacts.find(({ name }) => {
-      return name.toLowerCase() === newContact.name.toLowerCase();
-    });
+    const sameContact = contacts.find(
+      ({ name }) => name.toLowerCase() === newContact.name.toLowerCase()
+    );
     if (sameContact !== undefined) {
       return alert(`${sameContact.name} is already in contacts!`);
     }
     setContacts([...contacts, newContact]);
   };
 
-  const filterInputHandler = value => setFilter(value);
-
   const deleteContact = contactId => {
-    const newArray = contacts.filter(({ id }) => id !== contactId);
-    setContacts(newArray);
-    filterInputHandler('');
-    isContactDeleted.current = true;
+    setContacts(contacts.filter(({ id }) => id !== contactId));
+    setFilter('');
   };
 
   return (
@@ -60,11 +49,15 @@ export const App = () => {
       <Contacts>Contacts</Contacts>
       {contacts.length !== 0 ? (
         <>
-          <Filter inputHandler={filterInputHandler} filter={filter} />
-          <ContactList
-            contacts={filteredContacts}
-            deleteContact={deleteContact}
-          />
+          <Filter inputHandler={value => setFilter(value)} filter={filter} />
+          {filteredContacts.length !== 0 ? (
+            <ContactList
+              contacts={filteredContacts}
+              deleteContact={deleteContact}
+            />
+          ) : (
+            <NoContactsMessage>No matches found</NoContactsMessage>
+          )}
         </>
       ) : (
         <NoContactsMessage>

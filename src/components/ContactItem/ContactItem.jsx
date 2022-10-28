@@ -8,11 +8,7 @@ export const ContactItem = ({ contacts, deleteContact }) => {
         <Contact>
           {name}: {number}
         </Contact>
-        <ContactsDeleteBtn
-          type="button"
-          name={id}
-          onClick={e => deleteContact(e.target.name)}
-        >
+        <ContactsDeleteBtn type="button" onClick={() => deleteContact(id)}>
           Delete
         </ContactsDeleteBtn>
       </Item>
